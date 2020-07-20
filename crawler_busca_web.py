@@ -133,6 +133,21 @@ def search_destiny(last_urls, current_url_parsed):
     for new_url in urls_to_check:
         search_destiny(last_urls, new_url)
 
+    end = {
+        'found': False,
+        'origem': origem,
+        'destino': destino,
+        'origem_parsed': origem_parsed,
+        'destino_parsed': destino_parsed,
+        'passo_busca_largura': passo_busca_largura,
+        'passo_busca_profundidade': passo_busca_profundidade,
+        'seen_urls_amount': len(seen_urls.keys()),
+        'last_urls': last_urls,
+        'seen_urls': seen_urls,
+    }
+    result_log = json.dumps(end, indent=4)
+    exit(result_log)
+
 # MAIN
 
 search_destiny([], origem_parsed.netloc)

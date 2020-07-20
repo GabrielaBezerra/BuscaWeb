@@ -1,4 +1,4 @@
-#!/Users/gabi/Code/Python/IC/BuscaWeb/buscaweb/bin/python3
+#!/Users/gabi/Code/Python/BuscaWeb/buscaweb/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
