@@ -2,7 +2,9 @@
 
 # Dependencias
 import sys
-import json
+import time
+from queue import LifoQueue 
+from functools import reduce
 from bs4 import BeautifulSoup
 import urllib.request
 from urllib.parse import urlparse
@@ -14,155 +16,181 @@ banner = """
 | |_) | |_| \__ \ (_| (_| |\ V  V /  __/ |_) |
 |____/ \__,_|___/\___\__,_| \_/\_/ \___|_.__/ 
 
-Many pages make a thick book.
+pt-br: Achando o caminho entre duas URLs web usando Busca em Profundidade.
+en-us: Finding the path between two web URLs using Depth-First-Search (BFS).
+
+Author: Gabriela Bezerra, Guilherme Araújo, Ítalo Bruno, Pedro Moura.
 """
-print(banner)
 
-# Script Info
-scriptname = "crawler_busca_web"
-param1 = "<https://www.origem.com>"
-param2 = "<https://www.destino.com>"
-usage = "usage: ./"+scriptname+" "+param1+" "+param2+"\n"
+onboarding = """
+A short explanation before we begin.
+📚 Many pages make a thick book.
 
+This algorithm consists of (loosely) the following steps:
+    0. Define 3 main inputs: origin url, destiny url and the search limit amount.
+    1. Initialize the seen urls list, the processing stack and the search counter.
+    2. Add the origin url to the processing stack.
+    3. Verify if the search limit amount has been reached by the search counter.
+        3.1. If it did, print all the seen urls then End program.
+        3.2. If it didn't, continue the algorithm.
+    4. Process the last url of the stack by checking if it is the destiny url and append it to the seen urls list.
+        4.1. If it is, the algorithm prints all the urls between the origin url and the destiny url then End program.
+        4.2. It it isn't, continue the algorithm.
+    5. Make a GET request to the processed url and increment search counter.
+    6. Read the html page returned by the request.
+    7. Create a children urls list and append all the urls found inside any <a href=''> tag to it.
+    8. Check if the children urls list contains the destiny url.
+        8.1. If it does, the algorithm prints all the urls between the origin url and the destiny url then End program.
+        8.2. If it doesn't, append all the urls of the children urls list to the processing stack. 
+    9. Go back to step 3.
 
-# Input verification
-verify_params_quant = len(sys.argv) != 3
+"""
+
+# SCRIPT INFO
+scriptname = "crawler_busca_web.py"
+param1 = "<https://www.origin.com>"
+param2 = "<https://www.destiny.com>"
+param3 = "[<amount of searches allowed>]"
+usage = "usage: ./"+scriptname+" "+param1+" "+param2+" "+param3
+example = "You should try something like this: \n\n  ./"+scriptname+" \"http://pyfound.blogspot.com\" \"https://careers.google.com\" 9" 
+message = "\n"+usage+"\n\n"+example+"\n"
+
+# INPUT CHECK
+# Params verification
+verify_params_quant = len(sys.argv) != 4
 if verify_params_quant:
-    exit(usage)
-
+    exit(message)
+    
 param1_verify = len(urlparse(sys.argv[1]).netloc) == 0
 param2_verify = len(urlparse(sys.argv[2]).netloc) == 0
-if param1_verify or param2_verify:
-    exit(usage)
+param3_verify = len(sys.argv[3]) == 0 or int(sys.argv[3]) == None
+if param1_verify or param2_verify or param3_verify:
+    exit(message)
+
+# Initial URLs
+origin = sys.argv[1]
+destiny = sys.argv[2]
+
+# Search Limit
+limit = int(sys.argv[3])
 
 
-# VARIABLES AND CONSTANTS
-
-# Limite de busca
-limite = 3
-
-# Contadores de busca
-passo_busca_profundidade = 0
-passo_busca_largura = 0
-
-# URLs iniciais
-origem = sys.argv[1]
-destino = sys.argv[2]
-
-# Separando as URLs em Componentes
-origem_parsed = urlparse(origem)
-destino_parsed = urlparse(destino)
-
-# Seen URLs
-seen_urls = {}
-
+# DATA STRUCTURES
+# Process Structure
+stack = LifoQueue() 
+# Seen URLs Dictionary
+seen_urls = []
 
 # FUNCTIONS
-def get_domain(url):
-    return url.removing
+def depth_first_search(origin_url, destiny_url):
+    
+    stack.put(origin_url)  # start to search
+    
+    dfs_counter = 0
 
+    path_to_destiny = []
 
-def search_destiny(last_urls, current_url_parsed):
-    global destino_parsed, passo_busca_profundidade, passo_busca_largura
+    while (not stack.empty() and dfs_counter < limit):
+        dfs_counter += 1
+        print("\n🔎 DFS number",dfs_counter,"of",limit)
+        
+        # Proccess URL and remove it from Stack
+        current_url = stack.get()
+        
+        print("🧠 processing",current_url)
+        print("🥞 stack has",stack.qsize(),"items")
 
-    print("Checking", current_url_parsed)
+        if (never_seen(current_url)):
+            seen_urls.append(current_url)
+            path_to_destiny.append(current_url)
 
-    last_urls.append(current_url_parsed)
-
-    urls_to_check = []
-
-    # Incrementando passo da Busca em Profundidade:
-    #   Cada requisicao esta sendo contada como um passo de
-    #   busca em profundidade.
-    passo_busca_profundidade = passo_busca_profundidade + 1
-    seen_urls[current_url_parsed] = []
-
-    # Requisicao GET da origem
-    resposta = urllib.request.urlopen(origem)
-    html = resposta.read()  # Resposta html em formato String
-
-    # Parseando o texto html da resposta em componentes
-    soup = BeautifulSoup(html, 'html.parser')
-
-    # Encontrando os links dentro da resposta da requsicao
-    for link in soup.find_all('a'):
-
-        # Incrementando passo da Busca em Largura.
-        #   Cada link encontrado em cada pagina esta sendo contado como
-        #   um passo de busca em largura, mesmo que jã tenha sido visto.
-        passo_busca_largura = passo_busca_largura + 1
-
-        # Separando o texto do link encontrado em componentes
-        url = link.get('href')
-        url_parsed = urlparse(url).netloc
-
-        # Organizando os links
-        # Filtrando somente os de dominio diferentes
-        not_request_domain = current_url_parsed not in url_parsed
-        # print(current_url_parsed,url_parsed)
-
-        has_not_be_seen = True
-        for key, value in seen_urls.items():
-            if url_parsed in value or url_parsed == key:
-                has_not_be_seen = False
-
-        if url_parsed and not_request_domain and has_not_be_seen:
-
-            seen_urls[current_url_parsed].append(url_parsed)
-
-            print("Dominio diferente encontrado! "+url_parsed)
-            print("Destiny:                      "+destino_parsed.netloc)
-            print("\n")
-
-            if url_parsed in destino_parsed.netloc:
-                end = {
-                    'found': True,
-                    'passo_busca_largura': passo_busca_largura,
-                    'passo_busca_profundidade': passo_busca_profundidade,
-                    'checked_urls_amount': len(seen_urls.keys()),
-                    'path': last_urls,
-                    'seen_urls': seen_urls,
-                }
-                result_log = json.dumps(end, indent=4)
-                exit(result_log)
+            if current_url == destiny_url or current_url+"/" == destiny_url:
+                return path_to_destiny
+        
+            # Add its children URLs to Stack
+            children_urls = get_children_urls_from(current_url)
+            if len(children_urls) == 0:
+                path_to_destiny.pop()
             else:
-                urls_to_check.append(url_parsed)
-                # search_destiny(last_urls, url)
+                # Checking all urls inside this page
+                if destiny_url in children_urls or destiny_url+"/" in children_urls:
+                    path_to_destiny.append(destiny_url)
+                    return path_to_destiny
 
-    print(urls_to_check)
-    for new_url in urls_to_check:
-        search_destiny(last_urls, new_url)
+                # Adding urls to stack, for depth-first-search
+                max_new_size = stack.qsize()+len(children_urls)
+                for url in children_urls:
+                    if (never_seen(url)): 
+                        stack.put(url) 
+                discarded_amount = max_new_size - stack.qsize()
+                print("🥞 stack now has",stack.qsize(),"items. Discarded",discarded_amount,"urls (already seen).")   
+            
 
-    end = {
-        'found': False,
-        'origem': origem,
-        'destino': destino,
-        'origem_parsed': origem_parsed,
-        'destino_parsed': destino_parsed,
-        'passo_busca_largura': passo_busca_largura,
-        'passo_busca_profundidade': passo_busca_profundidade,
-        'seen_urls_amount': len(seen_urls.keys()),
-        'last_urls': last_urls,
-        'seen_urls': seen_urls,
-    }
-    result_log = json.dumps(end, indent=4)
-    exit(result_log)
+def never_seen(url):
+    has_not_be_seen = True
+    for seen in seen_urls:
+            if url == seen or url == seen+"/" or url+"/" == seen:
+                has_not_be_seen = False    
+    return has_not_be_seen
 
-# MAIN
+def sequencify_list(list, separator=" > "):
+    return reduce(lambda ac,element: ac+element+separator,list, "")[:-2]
 
-search_destiny([], origem_parsed.netloc)
+def map_path_to_url(path,url):
+    if ("http" not in path):
+        domain = urlparse(url)[1] if urlparse(url)[1][-1:] != "/" else urlparse(url)[1][:-1]
+        fixed_path = path.replace("//","/")
+        return urlparse(url)[0]+"://"+domain+fixed_path 
+    else:
+        return path
+
+def get_children_urls_from(url):
+
+    children = []
+
+    extension = url.split(".")[-1:][0]
+    if extension not in ["svg","png","jpg","ico","txt","pdf"]:
+            
+        print("📡 get request to",url)
+        # Requisicao GET da origem
+        try:
+            response = urllib.request.urlopen(url)
+            
+        except:
+            pass
+
+        else:
+            html = response.read()  # Resposta html em formato String
+        
+            # Parseando o texto html da resposta em componentes
+            soup = BeautifulSoup(html, 'html.parser')
+
+            links = soup.find_all('a') # + soup.find_all('link')
+            link_paths = list(map(lambda link: link.get('href'), links))
+            filtered_http_paths = list(filter(lambda path: (path != None and path != "/" and ("http://" in path or "https://" in path or (path[:1] == "/" and ":" not in path))), link_paths))
+            http_urls = list(map(lambda path: map_path_to_url(path,url), filtered_http_paths))
+
+            for url in http_urls: children.append(url)    
+
+    print("🤷 Found no children urls" if (len(children) == 0) else "⭐️ Found "+str(len(http_urls))+" children urls")
+    return children
 
 
-# TODO: Transformar esse código em função recursiva.
+# MAIN RUN
 
-# BUSCA EM PROFUNDIDADE - Recursiva
-# url_nova_origem = url_parseada.geturl()
-# busca_profundidade_recursiva(url_nova_origem)
+print(banner)
+time.sleep(5)
+print(onboarding)
+time.sleep(5)
+print("\nStarting at:",origin)
+print("Looking for:",destiny,"\n")
+print("Amount of searches:",limit)
 
-# Problema:
-# loop que faz chamadas recursivas que geram condicoes de
-# parada independentes.
-
-# Solucao:
-# Recursao de Recursao (?) ou Flag Global que eh verificada
-# sempre antes do comeco da funcao
+# Search
+url_path_to_destiny = depth_first_search(origin, destiny)
+if url_path_to_destiny:
+    sequencified_path_to_destiny = sequencify_list(url_path_to_destiny, separator="\n ")
+    print("\n 🎯🎉 FOUND IT! After",len(url_path_to_destiny),"requests using DFS, this is the path:\n",sequencified_path_to_destiny, "\n")
+else:
+    sequencified_cheked_urls = sequencify_list(seen_urls, separator="\n ")
+    print("\n 🙈 Destiny URL not found in",limit,"tries. Checked URLs:\n",sequencified_cheked_urls,"\n")

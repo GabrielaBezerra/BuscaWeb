@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "module": "crawler_busca_web",
-            "args": ["https://bbc.com", "https://doi.org"],
+            "args": ["http://pyfound.blogspot.com", "https://careers.google.com", "9"],
         }
     ]
 }
