@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "module": "crawler_busca_web",
-            "args": ["https://bbc.com", "https://doi.org"],
+            "args": ["https://en.wikipedia.org/wiki/Linux", "https://www.google.com/", "25"],
         }
     ]
 }
