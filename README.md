@@ -1,5 +1,5 @@
 # BuscaWeb
-Finding the path between two web URLs using Depth-First-Search (BFS).
+### Finding the path between two website URLs using Depth-First-Search (BFS).
 
 Authors: Gabriela Bezerra, Guilherme Araújo, Ítalo Bruno, Pedro Moura.
 
