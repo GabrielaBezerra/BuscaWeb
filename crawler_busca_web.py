@@ -2,6 +2,7 @@
 
 # Dependencias
 import sys
+import time
 from queue import LifoQueue 
 from functools import reduce
 from bs4 import BeautifulSoup
@@ -15,34 +16,60 @@ banner = """
 | |_) | |_| \__ \ (_| (_| |\ V  V /  __/ |_) |
 |____/ \__,_|___/\___\__,_| \_/\_/ \___|_.__/ 
 
-Many pages make a thick book.
+pt-br: Achando o caminho entre duas URLs web usando Busca em Profundidade.
+en-us: Finding the path between two web URLs using Depth-First-Search (BFS).
 
 Author: Gabriela Bezerra, Guilherme Araújo, Ítalo Bruno, Pedro Moura.
 """
 
-# SCRIPT INFO
-scriptname = "crawler_busca_web"
-param1 = "<https://www.origem.com>"
-param2 = "<https://www.destino.com>"
-param3 = "[28]"
-usage = "usage: ./"+scriptname+" "+param1+" "+param2+" "+param3+"\n"
+onboarding = """
+A short explanation before we begin.
+📚 Many pages make a thick book.
 
+This algorithm consists of (loosely) the following steps:
+    0. Define 3 main inputs: origin url, destiny url and the search limit amount.
+    1. Initialize the seen urls list, the processing stack and the search counter.
+    2. Add the origin url to the processing stack.
+    3. Verify if the search limit amount has been reached by the search counter.
+        3.1. If it did, print all the seen urls then End program.
+        3.2. If it didn't, continue the algorithm.
+    4. Process the last url of the stack by checking if it is the destiny url and append it to the seen urls list.
+        4.1. If it is, the algorithm prints all the urls between the origin url and the destiny url then End program.
+        4.2. It it isn't, continue the algorithm.
+    5. Make a GET request to the processed url and increment search counter.
+    6. Read the html page returned by the request.
+    7. Create a children urls list and append all the urls found inside any <a href=''> tag to it.
+    8. Check if the children urls list contains the destiny url.
+        8.1. If it does, the algorithm prints all the urls between the origin url and the destiny url then End program.
+        8.2. If it doesn't, append all the urls of the children urls list to the processing stack. 
+    9. Go back to step 3.
+
+"""
+
+# SCRIPT INFO
+scriptname = "crawler_busca_web.py"
+param1 = "<https://www.origin.com>"
+param2 = "<https://www.destiny.com>"
+param3 = "[<amount of searches allowed>]"
+usage = "usage: ./"+scriptname+" "+param1+" "+param2+" "+param3
+example = "You should try something like this: \n\n  ./"+scriptname+" \"http://pyfound.blogspot.com\" \"https://careers.google.com\" 9" 
+message = "\n"+usage+"\n\n"+example+"\n"
 
 # INPUT CHECK
 # Params verification
 verify_params_quant = len(sys.argv) != 4
 if verify_params_quant:
-    exit(usage)
+    exit(message)
     
 param1_verify = len(urlparse(sys.argv[1]).netloc) == 0
 param2_verify = len(urlparse(sys.argv[2]).netloc) == 0
 param3_verify = len(sys.argv[3]) == 0 or int(sys.argv[3]) == None
 if param1_verify or param2_verify or param3_verify:
-    exit(usage)
+    exit(message)
 
 # Initial URLs
-origem = sys.argv[1]
-destino = sys.argv[2]
+origin = sys.argv[1]
+destiny = sys.argv[2]
 
 # Search Limit
 limit = int(sys.argv[3])
@@ -65,19 +92,19 @@ def depth_first_search(origin_url, destiny_url):
 
     while (not stack.empty() and dfs_counter < limit):
         dfs_counter += 1
-        print("\n🔎 depth first search number",dfs_counter,"of",limit)
+        print("\n🔎 DFS number",dfs_counter,"of",limit)
         
         # Proccess URL and remove it from Stack
         current_url = stack.get()
         
         print("🧠 processing",current_url)
-        print("🎲 stack has",stack.qsize(),"items")
+        print("🥞 stack has",stack.qsize(),"items")
 
         if (never_seen(current_url)):
             seen_urls.append(current_url)
             path_to_destiny.append(current_url)
 
-            if current_url == destiny_url:
+            if current_url == destiny_url or current_url+"/" == destiny_url:
                 return path_to_destiny
         
             # Add its children URLs to Stack
@@ -85,12 +112,19 @@ def depth_first_search(origin_url, destiny_url):
             if len(children_urls) == 0:
                 path_to_destiny.pop()
             else:
+                # Checking all urls inside this page
+                if destiny_url in children_urls or destiny_url+"/" in children_urls:
+                    path_to_destiny.append(destiny_url)
+                    return path_to_destiny
+
+                # Adding urls to stack, for depth-first-search
                 max_new_size = stack.qsize()+len(children_urls)
                 for url in children_urls:
                     if (never_seen(url)): 
                         stack.put(url) 
                 discarded_amount = max_new_size - stack.qsize()
-                print("🎲 stack now has",stack.qsize(),"items. Discarded",discarded_amount,"urls (already seen).")   
+                print("🥞 stack now has",stack.qsize(),"items. Discarded",discarded_amount,"urls (already seen).")   
+            
 
 def never_seen(url):
     has_not_be_seen = True
@@ -145,15 +179,18 @@ def get_children_urls_from(url):
 # MAIN RUN
 
 print(banner)
-print("\nStarting at:",origem)
-print("Looking for:",destino,"\n")
-print("Amount of searches:",limit,"\n")
+time.sleep(5)
+print(onboarding)
+time.sleep(5)
+print("\nStarting at:",origin)
+print("Looking for:",destiny,"\n")
+print("Amount of searches:",limit)
 
 # Search
-url_path_to_destiny = depth_first_search(origem, destino)
+url_path_to_destiny = depth_first_search(origin, destiny)
 if url_path_to_destiny:
     sequencified_path_to_destiny = sequencify_list(url_path_to_destiny, separator="\n ")
-    print("\n 🎯🎉 FOUND IT! This is the path:\n",sequencified_path_to_destiny, "\n")
+    print("\n 🎯🎉 FOUND IT! After",len(url_path_to_destiny),"requests using DFS, this is the path:\n",sequencified_path_to_destiny, "\n")
 else:
     sequencified_cheked_urls = sequencify_list(seen_urls, separator="\n ")
     print("\n 🙈 Destiny URL not found in",limit,"tries. Checked URLs:\n",sequencified_cheked_urls,"\n")
