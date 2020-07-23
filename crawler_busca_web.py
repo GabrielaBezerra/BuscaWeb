@@ -16,17 +16,19 @@ banner = """
 | |_) | |_| \__ \ (_| (_| |\ V  V /  __/ |_) |
 |____/ \__,_|___/\___\__,_| \_/\_/ \___|_.__/ 
 
-pt-br: Achando o caminho entre duas URLs web usando Busca em Profundidade.
-en-us: Finding the path between two web URLs using Depth-First-Search (BFS).
+Many pages make a thick book.
 
-Author: Gabriela Bezerra, Guilherme Araújo, Ítalo Bruno, Pedro Moura.
+en-us: Finding the path between two web URLs using Depth-First-Search (DFS).
+pt-br: Achando o caminho entre duas URLs web usando Busca em Profundidade.
+
+Authors: Gabriela Bezerra, Guilherme Araújo, Ítalo Bruno, Pedro Moura.
 """
 
 onboarding = """
 A short explanation before we begin.
-📚 Many pages make a thick book.
 
-This algorithm consists of (loosely) the following steps:
+This algorithm consists of the following steps: (simplified step-by-step description)
+
     0. Define 3 main inputs: origin url, destiny url and the search limit amount.
     1. Initialize the seen urls list, the processing stack and the search counter.
     2. Add the origin url to the processing stack.
@@ -92,13 +94,13 @@ def depth_first_search(origin_url, destiny_url):
 
     while (not stack.empty() and dfs_counter < limit):
         dfs_counter += 1
-        print("\n🔎 DFS number",dfs_counter,"of",limit)
+        print("\nDFS number",dfs_counter,"of",limit)
         
         # Proccess URL and remove it from Stack
         current_url = stack.get()
         
-        print("🧠 processing",current_url)
-        print("🥞 stack has",stack.qsize(),"items")
+        print("processing",current_url)
+        print("stack has",stack.qsize(),"items")
 
         if (never_seen(current_url)):
             seen_urls.append(current_url)
@@ -123,7 +125,7 @@ def depth_first_search(origin_url, destiny_url):
                     if (never_seen(url)): 
                         stack.put(url) 
                 discarded_amount = max_new_size - stack.qsize()
-                print("🥞 stack now has",stack.qsize(),"items. Discarded",discarded_amount,"urls (already seen).")   
+                print("stack now has",stack.qsize(),"items. Discarded",discarded_amount," already seen urls.")   
             
 
 def never_seen(url):
@@ -151,7 +153,7 @@ def get_children_urls_from(url):
     extension = url.split(".")[-1:][0]
     if extension not in ["svg","png","jpg","ico","txt","pdf"]:
             
-        print("📡 get request to",url)
+        print("get request to",url)
         # Requisicao GET da origem
         try:
             response = urllib.request.urlopen(url)
@@ -172,16 +174,16 @@ def get_children_urls_from(url):
 
             for url in http_urls: children.append(url)    
 
-    print("🤷 Found no children urls" if (len(children) == 0) else "⭐️ Found "+str(len(http_urls))+" children urls")
+    print("Found no children urls" if (len(children) == 0) else "Found "+str(len(http_urls))+" children urls")
     return children
 
 
 # MAIN RUN
 
 print(banner)
-time.sleep(5)
+time.sleep(3)
 print(onboarding)
-time.sleep(5)
+time.sleep(2)
 print("\nStarting at:",origin)
 print("Looking for:",destiny,"\n")
 print("Amount of searches:",limit)
@@ -190,7 +192,7 @@ print("Amount of searches:",limit)
 url_path_to_destiny = depth_first_search(origin, destiny)
 if url_path_to_destiny:
     sequencified_path_to_destiny = sequencify_list(url_path_to_destiny, separator="\n ")
-    print("\n 🎯🎉 FOUND IT! After",len(url_path_to_destiny),"requests using DFS, this is the path:\n",sequencified_path_to_destiny, "\n")
+    print("\nFOUND IT! After looking",len(url_path_to_destiny),"urls using DFS, this is the path:\n",sequencified_path_to_destiny, "\n")
 else:
     sequencified_cheked_urls = sequencify_list(seen_urls, separator="\n ")
-    print("\n 🙈 Destiny URL not found in",limit,"tries. Checked URLs:\n",sequencified_cheked_urls,"\n")
+    print("\nDestiny URL not found in",limit,"tries. Checked URLs:\n",sequencified_cheked_urls,"\n")
