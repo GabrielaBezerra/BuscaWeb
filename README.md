@@ -1,7 +1,9 @@
 # BuscaWeb
-### Finding the path between two website URLs using Depth-First-Search (BFS).
+### Using Depth-First-Search (DFS) to find the URLs between two websites, given the amount of tries.
 
-Authors: Gabriela Bezerra, Guilherme Araújo, Ítalo Bruno, Pedro Moura.
+*Authors: Gabriela Bezerra, Guilherme Araújo, Ítalo Bruno, Pedro Moura.*
+
+Implemented with Python 3.8.5 and Beautiful Soup 4.
 
 ## Getting Started
 Enter the project's venv
@@ -28,7 +30,7 @@ Usage
 ## 📚 Many pages make a thick book.
 ### A short explanation before we begin.
 
-This algorithm consists of (loosely) the following steps:
+This algorithm consists of the following steps: (simplified step-by-step description)
 
 0. Define 3 main inputs: origin url, destiny url and the search limit amount.
 1. Initialize the seen urls list, the processing stack and the search counter.
