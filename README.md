@@ -22,6 +22,10 @@ Run the script
 
 `./crawler_busca_web.py "http://pyfound.blogspot.com" "https://careers.google.com" 9`
 
+Another way to run the script would be
+
+`python crawler_busca_web.py "http://pyfound.blogspot.com" "https://careers.google.com" 9`
+
 Usage
 
 `./crawler_busca_web.py <https://www.origin.com> <https://www.destiny.com> [<amount of searches allowed>]`

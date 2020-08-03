@@ -8,6 +8,7 @@ from functools import reduce
 from bs4 import BeautifulSoup
 import urllib.request
 from urllib.parse import urlparse
+from typing import List
 
 banner = """
  ____                    __        __   _     
@@ -88,7 +89,7 @@ stack = LifoQueue()
 seen_urls = []
 
 # FUNCTIONS
-def depth_first_search(origin_url, destiny_url):
+def depth_first_search(origin_url: str, destiny_url: str, limit: int):
 
     stack.put(origin_url)  # start to search
 
@@ -138,19 +139,27 @@ def depth_first_search(origin_url, destiny_url):
                 )
 
 
-def never_seen(url):
+def never_seen(url: str) -> bool:
+    """
+        Function that returns a Boolean that tells whether the URL has been visited before or not.
+    """
     has_not_be_seen = True
     for seen in seen_urls:
         if url == seen or url == seen + "/" or url + "/" == seen:
             has_not_be_seen = False
+
     return has_not_be_seen
 
 
-def sequencify_list(list, separator=" > "):
-    return reduce(lambda ac, element: ac + element + separator, list, "")[:-2]
+def sequencify_list(urls_list: List[str], separator: str = " > ") -> str:
+    """
+        Function that returns a formatted character string, according to the separator passed as a parameter, 
+        which informs the path taken by the depth search algorithm.
+    """
+    return reduce(lambda ac, element: ac + element + separator, urls_list, "")[:-2]
 
 
-def map_path_to_url(path, url):
+def map_path_to_url(path: str, url: str):
     if "http" not in path:
         domain = (
             urlparse(url)[1] if urlparse(url)[1][-1:] != "/" else urlparse(url)[1][:-1]
@@ -161,7 +170,10 @@ def map_path_to_url(path, url):
         return path
 
 
-def get_children_urls_from(url):
+def get_children_urls_from(url: str) -> List[str]:
+    """
+    Function that returns all child urls that I can access from a web page.
+    """
 
     children = []
 
@@ -213,33 +225,36 @@ def get_children_urls_from(url):
     return children
 
 
-# MAIN RUN
+if __name__ == "__main__":
+    # MAIN RUN
 
-print(banner)
-time.sleep(3)
-print(onboarding)
-time.sleep(2)
-print("\nStarting at:", origin)
-print("Looking for:", destiny, "\n")
-print("Amount of searches:", limit)
+    print(banner)
+    time.sleep(3)
+    print(onboarding)
+    time.sleep(2)
+    print("\nStarting at:", origin)
+    print("Looking for:", destiny, "\n")
+    print("Amount of searches:", limit)
 
-# Search
-url_path_to_destiny = depth_first_search(origin, destiny)
-if url_path_to_destiny:
-    sequencified_path_to_destiny = sequencify_list(url_path_to_destiny, separator="\n ")
-    print(
-        "\nFOUND IT! After looking",
-        len(url_path_to_destiny),
-        "urls using DFS, this is the path:\n",
-        sequencified_path_to_destiny,
-        "\n",
-    )
-else:
-    sequencified_cheked_urls = sequencify_list(seen_urls, separator="\n ")
-    print(
-        "\nDestiny URL not found in",
-        limit,
-        "tries. Checked URLs:\n",
-        sequencified_cheked_urls,
-        "\n",
-    )
+    # Search
+    url_path_to_destiny = depth_first_search(origin, destiny, limit)
+    if url_path_to_destiny:
+        sequencified_path_to_destiny = sequencify_list(
+            url_path_to_destiny, separator="\n "
+        )
+        print(
+            "\nFOUND IT! After looking",
+            len(url_path_to_destiny),
+            "urls using DFS, this is the path:\n",
+            sequencified_path_to_destiny,
+            "\n",
+        )
+    else:
+        sequencified_cheked_urls = sequencify_list(seen_urls, separator="\n ")
+        print(
+            "\nDestiny URL not found in",
+            limit,
+            "tries. Checked URLs:\n",
+            sequencified_cheked_urls,
+            "\n",
+        )
