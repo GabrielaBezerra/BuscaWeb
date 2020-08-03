@@ -90,6 +90,13 @@ seen_urls = []
 
 # FUNCTIONS
 def depth_first_search(origin_url: str, destiny_url: str, limit: int):
+    """
+    en-us: Function that performs the search for depth from a source url using stack, 
+    until the limit passed in the execution of the program is reached or the destination url is found.
+    
+    pt-br: Função que realiza a busca por profundidade a partir de uma url de origem utilizando pilha, 
+    até que o limite passado na execução do programa seja atingido ou o a url destino seja encontrada.
+    """
 
     stack.put(origin_url)  # start to search
 
@@ -141,7 +148,8 @@ def depth_first_search(origin_url: str, destiny_url: str, limit: int):
 
 def never_seen(url: str) -> bool:
     """
-        Function that returns a Boolean that tells whether the URL has been visited before or not.
+    en-us: Function that returns a Boolean informing whether the URL has been visited before or not.
+    pt-br: Função que retorna um booleano informando se a URL já foi visitado anteriormente ou não.
     """
     has_not_be_seen = True
     for seen in seen_urls:
@@ -153,13 +161,22 @@ def never_seen(url: str) -> bool:
 
 def sequencify_list(urls_list: List[str], separator: str = " > ") -> str:
     """
-        Function that returns a formatted character string, according to the separator passed as a parameter, 
-        which informs the path taken by the depth search algorithm.
+    en-us: Function that returns a formatted character string, according to the separator passed as a parameter, 
+    which informs the path taken by the depth search algorithm.
+    
+    pt-br: Função que retorna uma cadeia de caracteres formatada, de acordo com o separador passado como parâmetro, 
+    que informa o caminho percorrido pelo algoritmo de pesquisa em profundidade.
     """
     return reduce(lambda ac, element: ac + element + separator, urls_list, "")[:-2]
 
 
 def map_path_to_url(path: str, url: str):
+    """
+    en-us: Function that parses a url if it is a reference to a sub-directory.
+    pt-br: Função que faz o parse de uma url caso ela seja uma referência para um sub-diretório.
+    ex.: //profile -> https://facebook.com/profile
+    """
+
     if "http" not in path:
         domain = (
             urlparse(url)[1] if urlparse(url)[1][-1:] != "/" else urlparse(url)[1][:-1]
@@ -172,7 +189,8 @@ def map_path_to_url(path: str, url: str):
 
 def get_children_urls_from(url: str) -> List[str]:
     """
-    Function that returns all child urls that I can access from a web page.
+    en-us: Function that returns all child urls that can be accessed through a base url
+    pt-br: Função que retorna todas as urls filhas que possam ser acessadas através de uma url base
     """
 
     children = []
