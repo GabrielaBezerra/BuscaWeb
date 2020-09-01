@@ -32,7 +32,10 @@ Usage
 
 
 ## 📚 Many pages make a thick book.
-### A short explanation before we begin.
+
+Video with Code explanation in portuguese: https://youtu.be/VhKkGs4ooO0
+
+### A short (informal) general explanation of the algorithm workflow.
 
 This algorithm consists of the following steps: (simplified step-by-step description)
 
