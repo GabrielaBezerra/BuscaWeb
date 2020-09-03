@@ -33,7 +33,7 @@ Usage
 
 ## 📚 Many pages make a thick book.
 
-Video with Code explanation in portuguese: https://youtu.be/VhKkGs4ooO0
+[YouTube Video with code explanation in portuguese](https://www.youtube.com/watch?v=PfkVDRjIFic)
 
 ### A short (informal) general explanation of the algorithm workflow.
 
